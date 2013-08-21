@@ -92,7 +92,7 @@ bool ArenaTeam::AddMember(uint64 playerGuid)
     uint8 playerClass;
 
     // Check if arena team is full (Can't have more than type * 2 players)
-    if (GetMembersSize() >= GetType() * 2)
+    if (GetMembersSize() >= GetType() * 3)
         return false;
 
     // Get player name and class either from db or ObjectMgr
