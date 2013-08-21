@@ -817,6 +817,7 @@ Player::Player(WorldSession* session): Unit(true)
         m_baseRatingValue[i] = 0;
 
     m_baseSpellPower = 0;
+	m_spellPowerOverflow = 0;
     m_baseFeralAP = 0;
     m_baseManaRegen = 0;
     m_baseHealthRegen = 0;

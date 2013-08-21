@@ -133,6 +133,34 @@ bool Player::UpdateStats(Stats stat)
 
 void Player::ApplySpellPowerBonus(int32 amount, bool apply)
 {
+	if (amount < 0 && apply == true && abs(amount) > GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + 1))
+	{
+		m_spellPowerOverflow += abs(amount);
+		m_spellPowerOverflow -= GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + 1);
+	}
+	else if (amount > 0 && apply == true && m_spellPowerOverflow > 0)
+	{
+		if (amount > m_spellPowerOverflow)
+		{
+			m_spellPowerOverflow -= amount;
+			amount = abs(m_spellPowerOverflow);
+			m_spellPowerOverflow = 0;
+		}
+		else
+		{
+			m_spellPowerOverflow -= amount;
+			amount = 0;
+		}
+	}
+	else if (amount < 0 && apply == false && m_spellPowerOverflow > 0)
+	{
+		amount += m_spellPowerOverflow;
+		m_spellPowerOverflow = 0;
+	}
+	else if (amount > 0 && apply == false && amount > GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + 1))
+	{
+		m_spellPowerOverflow += abs((int32)GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + 1) - amount);
+	}
     apply = _ModifyUInt32(apply, m_baseSpellPower, amount);
 
     // For speed just update for client
