@@ -1583,7 +1583,25 @@ void AuraEffect::HandlePhase(AuraApplication const* aurApp, uint8 mode, bool app
 void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mode, bool apply) const
 {
     if (!(mode & AURA_EFFECT_HANDLE_REAL))
+	{
+		ShapeshiftForm form = ShapeshiftForm(GetMiscValue());
+		switch(form)
+		{
+			case FORM_CAT:
+            case FORM_TREE:
+            case FORM_TRAVEL:
+            case FORM_AQUA:
+            case FORM_BEAR:
+            case FORM_DIREBEAR:
+            case FORM_FLIGHT_EPIC:
+            case FORM_FLIGHT:
+			case FORM_MOONKIN:
+				Unit* target = aurApp->GetTarget();
+				target->RemoveMovementImpairingAuras();
+				break;
+		}
         return;
+	}
 
     Unit* target = aurApp->GetTarget();
 
