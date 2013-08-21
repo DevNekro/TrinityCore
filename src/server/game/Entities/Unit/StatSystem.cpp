@@ -214,8 +214,16 @@ bool Player::UpdateAllStats()
 
 void Player::ApplySpellPenetrationBonus(int32 amount, bool apply)
 {
-    ApplyModInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE, -amount, apply);
-    m_spellPenetrationItemMod += apply ? amount : -amount;
+     if(m_spellPenetrationItemMod + (apply ? amount : -amount) > 800)
+	 {
+		 m_spellPenetrationItemMod = 800;
+		 SetInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE, 800);
+	 }
+	 else
+	 {
+		 m_spellPenetrationItemMod += apply ? amount : -amount;
+		 ApplyModInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE, -amount, apply);
+	 }
 }
 
 void Player::UpdateResistances(uint32 school)
