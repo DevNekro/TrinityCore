@@ -40,6 +40,7 @@ enum WarlockSpells
     SPELL_WARLOCK_FEL_SYNERGY_HEAL                  = 54181,
     SPELL_WARLOCK_GLYPH_OF_SHADOWFLAME              = 63311,
     SPELL_WARLOCK_GLYPH_OF_SIPHON_LIFE              = 63106,
+	SPELL_WARLOCK_GLYPH_OF_SUCCUBUS					= 56250,
     SPELL_WARLOCK_HAUNT                             = 48181,
     SPELL_WARLOCK_HAUNT_HEAL                        = 48210,
     SPELL_WARLOCK_IMPROVED_HEALTHSTONE_R1           = 18692,
@@ -52,7 +53,8 @@ enum WarlockSpells
     SPELL_WARLOCK_LIFE_TAP_ENERGIZE_2               = 32553,
     SPELL_WARLOCK_SOULSHATTER                       = 32835,
     SPELL_WARLOCK_SIPHON_LIFE_HEAL                  = 63106,
-    SPELL_WARLOCK_UNSTABLE_AFFLICTION_DISPEL        = 31117
+    SPELL_WARLOCK_UNSTABLE_AFFLICTION_DISPEL        = 31117,
+	SPELL_PRIEST_SHADOW_WORD_DEATH					= 32409
 };
 
 enum WarlockSpellIcons
@@ -703,6 +705,42 @@ class spell_warl_ritual_of_doom_effect : public SpellScriptLoader
         }
 };
 
+// 56250 - Glyph of Succubus Effect
+class spell_warl_seduction : public SpellScriptLoader
+{
+	public:
+		spell_warl_seduction() : SpellScriptLoader("spell_warl_seduction") { }
+
+		class spell_warl_seduction_SpellScript : public SpellScript
+		{
+			PrepareSpellScript(spell_warl_seduction_SpellScript);
+
+			void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+			{
+				Unit* caster = GetCaster();
+				if (Unit* target = GetHitUnit())
+				{
+					if (caster->GetOwner() && caster->GetOwner()->HasAura(SPELL_WARLOCK_GLYPH_OF_SUCCUBUS))
+					{
+						target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE, 0, target->GetAura(SPELL_PRIEST_SHADOW_WORD_DEATH)); //SW:D shall not be removed.
+						target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
+						target->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
+					}
+				}
+			}
+
+			void Register()
+			{
+				OnEffectHitTarget += SpellEffectFn(spell_warl_seduction_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+			}
+		};
+
+		SpellScript* GetSpellScript() const
+		{
+			return new spell_warl_seduction_SpellScript();
+		}
+};
+
 // -27285 - Seed of Corruption
 class spell_warl_seed_of_corruption : public SpellScriptLoader
 {
@@ -911,6 +949,7 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_health_funnel();
     new spell_warl_life_tap();
     new spell_warl_ritual_of_doom_effect();
+	new spell_warl_seduction();
     new spell_warl_seed_of_corruption();
     new spell_warl_shadow_ward();
     new spell_warl_siphon_life();

@@ -5851,6 +5851,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     triggered_spell_id = 37378;
                     break;
                 }
+				/*
                 // Glyph of Succubus
                 case 56250:
                 {
@@ -5860,7 +5861,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
                     target->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
                     return true;
-                }
+                }*/
             }
             break;
         }

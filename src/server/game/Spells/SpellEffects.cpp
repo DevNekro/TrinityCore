@@ -548,7 +548,8 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                                         unitTarget->RemoveAuraFromStack(spellId, m_caster->GetGUID());
 
                                 damage *= doses;
-                                damage += int32(player->GetTotalAttackPowerValue(BASE_ATTACK) * 0.09f * combo);
+                                damage += int32(player->GetTotalAttackPowerValue(BASE_ATTACK) * 0.075f * combo);
+								damage *= 0.6f;
                             }
 
                             // Eviscerate and Envenom Bonus Damage (item set effect)
@@ -628,6 +629,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     // Add main hand dps * effect[2] amount
                     float average = (m_caster->GetFloatValue(UNIT_FIELD_MINDAMAGE) + m_caster->GetFloatValue(UNIT_FIELD_MAXDAMAGE)) / 2;
                     int32 count = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, EFFECT_2);
+					count -= 2;
                     damage += count * int32(average * IN_MILLISECONDS) / m_caster->GetAttackTime(BASE_ATTACK);
                     break;
                 }

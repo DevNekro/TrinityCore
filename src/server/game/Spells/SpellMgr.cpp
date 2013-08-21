@@ -3034,6 +3034,56 @@ void SpellMgr::LoadSpellInfoCorrections()
 
         switch (spellInfo->Id)
         {
+			case 48691: //Ambush
+				spellInfo->Effects[EFFECT_1].BasePoints += 230;
+				break;
+			case 48792: //IBF
+				spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(1);; //Sets duration to 10 seconds with talent
+				spellInfo->Effects[EFFECT_0].Effect = 0;
+				break;
+			case 48660: //Hemorrhage
+				spellInfo->Effects[EFFECT_1].BasePoints += 90;
+				break;
+			case 48665: //Mutilate
+			case 48664:
+				spellInfo->Effects[EFFECT_0].BasePoints += 15;
+				break;
+			case 35395: //Crusader Strike
+				spellInfo->Effects[EFFECT_1].BasePoints += 150;
+				break;
+			case 53385: //Divine Storm
+				spellInfo->MaxAffectedTargets = 4;
+				spellInfo->Effects[EFFECT_2].BasePoints += 500;
+				break;
+			case 4328: //Teleporter Fix
+				spellInfo->Effects[EFFECT_0].TargetA = 1;
+				break;
+			case 57841: //Killing Spree MH
+			case 57842: //Killing Spree OH
+				spellInfo->Effects[EFFECT_0].BasePoints += 50;
+				break;
+			case 24259: //Fixed Spell Lock lockout
+				spellInfo->Speed = 80;
+				break;
+			case 55268: //Frost Srike MH
+			case 66953: //Frost Strike OH
+				spellInfo->Effects[EFFECT_1].BasePoints = 40;
+				break;
+			case 18754: // Improved Succubus r1
+				spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_ADD_FLAT_MODIFIER;
+				spellInfo->Effects[EFFECT_0].BasePoints = -1.5*IN_MILLISECONDS*0.22;
+				spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_CASTER;
+				break;
+			case 18755: // Improved Succubus r2
+				spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_ADD_FLAT_MODIFIER;
+				spellInfo->Effects[EFFECT_0].BasePoints = -1.5*IN_MILLISECONDS*0.44;
+				spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_CASTER;
+				break;
+			case 18756: // Improved Succubus r3
+				spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_ADD_FLAT_MODIFIER;
+				spellInfo->Effects[EFFECT_0].BasePoints = -1.5*IN_MILLISECONDS*0.66;
+				spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_CASTER;
+				break;
             case 53096: // Quetz'lun's Judgment
                 spellInfo->MaxAffectedTargets = 1;
                 break;
@@ -3165,7 +3215,6 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->MaxAffectedTargets = 3;
                 break;
             case 38310: // Multi-Shot
-            case 53385: // Divine Storm (Damage)
                 spellInfo->MaxAffectedTargets = 4;
                 break;
             case 42005: // Bloodboil
