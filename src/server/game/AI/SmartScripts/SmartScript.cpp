@@ -1277,7 +1277,15 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
             for (ObjectList::const_iterator itr = targets->begin(); itr != targets->end(); ++itr)
             {
                 if (IsPlayer(*itr))
-                    (*itr)->ToPlayer()->TeleportTo(e.action.teleport.mapID, e.target.x, e.target.y, e.target.z, e.target.o);
+				{
+					if (e.action.teleport.ignoreCombat == 0)
+					{
+						if ((*itr)->ToPlayer()->IsInCombat())
+						{
+							(*itr)->ToPlayer()->TeleportTo(e.action.teleport.mapID, e.target.x, e.target.y, e.target.z, e.target.o);
+						}
+					}
+				}
                 else if (IsCreature(*itr))
                     (*itr)->ToCreature()->NearTeleportTo(e.target.x, e.target.y, e.target.z, e.target.o);
             }

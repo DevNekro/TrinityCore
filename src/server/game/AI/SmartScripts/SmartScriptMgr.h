@@ -798,6 +798,7 @@ struct SmartAction
         struct
         {
             uint32 mapID;
+			uint32 ignoreCombat;
         } teleport;
 
         struct
