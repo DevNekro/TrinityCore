@@ -5781,7 +5781,7 @@ float Player::GetMeleeCritFromAgility()
         return 0.0f;
 
     float crit = critBase->base + GetStat(STAT_AGILITY)*critRatio->ratio;
-    return crit*100.0f;
+    return crit*40.0f;
 }
 
 void Player::GetDodgeFromAgility(float &diminishing, float &nondiminishing)
@@ -5810,7 +5810,7 @@ void Player::GetDodgeFromAgility(float &diminishing, float &nondiminishing)
          2.00f/1.15f,    // Rogue
          1.00f/1.15f,    // Priest
          0.85f/1.15f,    // DK
-         1.60f/1.15f,    // Shaman
+         0.50f/1.15f,    // Shaman
          1.00f/1.15f,    // Mage
          0.97f/1.15f,    // Warlock (?)
          0.0f,           // ??
@@ -5833,7 +5833,7 @@ void Player::GetDodgeFromAgility(float &diminishing, float &nondiminishing)
     float bonus_agility = GetStat(STAT_AGILITY) - base_agility;
 
     // calculate diminishing (green in char screen) and non-diminishing (white) contribution
-    diminishing = 100.0f * bonus_agility * dodgeRatio->ratio * crit_to_dodge[pclass-1];
+    diminishing = 3.2f * bonus_agility * dodgeRatio->ratio * crit_to_dodge[pclass-1];
     nondiminishing = 100.0f * (dodge_base[pclass-1] + base_agility * dodgeRatio->ratio * crit_to_dodge[pclass-1]);
 }
 
@@ -5851,7 +5851,7 @@ float Player::GetSpellCritFromIntellect()
         return 0.0f;
 
     float crit=critBase->base + GetStat(STAT_INTELLECT)*critRatio->ratio;
-    return crit*100.0f;
+    return crit*40.0f;
 }
 
 float Player::GetRatingMultiplier(CombatRating cr) const

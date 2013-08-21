@@ -16654,6 +16654,81 @@ uint32 Unit::GetModelForTotem(PlayerTotemType totemType)
             }
             break;
         }
+		case RACE_HUMAN:
+		{
+			switch (totemType)
+            {
+                case SUMMON_TYPE_TOTEM_FIRE: // fire
+                    return 30758;
+                case SUMMON_TYPE_TOTEM_EARTH: // earth
+                    return 30757;
+                case SUMMON_TYPE_TOTEM_WATER: // water
+                    return 30759;
+                case SUMMON_TYPE_TOTEM_AIR: // air
+                    return 30756;
+            }
+            break;
+		}
+		case RACE_NIGHTELF:
+		{
+		switch (totemType)
+            {
+                case SUMMON_TYPE_TOTEM_FIRE: // fire
+                    return 30758;
+                case SUMMON_TYPE_TOTEM_EARTH: // earth
+                    return 30757;
+                case SUMMON_TYPE_TOTEM_WATER: // water
+                    return 30759;
+                case SUMMON_TYPE_TOTEM_AIR: // air
+                    return 30756;
+            }
+            break;
+		}
+		case RACE_GNOME:
+		{
+		switch (totemType)
+            {
+                case SUMMON_TYPE_TOTEM_FIRE: // fire
+                    return 30758;
+                case SUMMON_TYPE_TOTEM_EARTH: // earth
+                    return 30757;
+                case SUMMON_TYPE_TOTEM_WATER: // water
+                    return 30759;
+                case SUMMON_TYPE_TOTEM_AIR: // air
+                    return 30756;
+            }
+            break;
+		}
+		case RACE_UNDEAD_PLAYER:
+		{
+		switch (totemType)
+            {
+                case SUMMON_TYPE_TOTEM_FIRE: // fire
+                    return 30758;
+                case SUMMON_TYPE_TOTEM_EARTH: // earth
+                    return 30757;
+                case SUMMON_TYPE_TOTEM_WATER: // water
+                    return 30759;
+                case SUMMON_TYPE_TOTEM_AIR: // air
+                    return 30756;
+            }
+            break;
+		}
+		case RACE_BLOODELF:
+		{
+		switch (totemType)
+            {
+                case SUMMON_TYPE_TOTEM_FIRE: // fire
+                    return 30758;
+                case SUMMON_TYPE_TOTEM_EARTH: // earth
+                    return 30757;
+                case SUMMON_TYPE_TOTEM_WATER: // water
+                    return 30759;
+                case SUMMON_TYPE_TOTEM_AIR: // air
+                    return 30756;
+            }
+            break;
+		}
     }
     return 0;
 }

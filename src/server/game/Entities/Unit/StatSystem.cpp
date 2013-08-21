@@ -692,7 +692,7 @@ void Player::UpdateParryPercentage()
         145.560408f,    // Hunter
         145.560408f,    // Rogue
         0.0f,           // Priest
-        47.003525f,     // DK
+        10.003525f,     // DK
         145.560408f,    // Shaman
         0.0f,           // Mage
         0.0f,           // Warlock
@@ -729,12 +729,12 @@ void Player::UpdateDodgePercentage()
     const float dodge_cap[MAX_CLASSES] =
     {
         88.129021f,     // Warrior
-        88.129021f,     // Paladin
+        44.129021f,     // Paladin
         145.560408f,    // Hunter
         145.560408f,    // Rogue
         150.375940f,    // Priest
         88.129021f,     // DK
-        145.560408f,    // Shaman
+        72.780204f,    // Shaman
         150.375940f,    // Mage
         150.375940f,    // Warlock
         0.0f,           // ??
@@ -1248,13 +1248,17 @@ void Guardian::UpdateMaxHealth()
     float multiplicator;
     switch (GetEntry())
     {
-        case ENTRY_IMP:         multiplicator = 8.4f;   break;
-        case ENTRY_VOIDWALKER:  multiplicator = 11.0f;  break;
-        case ENTRY_SUCCUBUS:    multiplicator = 9.1f;   break;
-        case ENTRY_FELHUNTER:   multiplicator = 9.5f;   break;
-        case ENTRY_FELGUARD:    multiplicator = 11.0f;  break;
-        case ENTRY_BLOODWORM:   multiplicator = 1.0f;   break;
-        default:                multiplicator = 10.0f;  break;
+        case ENTRY_IMP:				multiplicator = 17.4f;   break;
+        case ENTRY_VOIDWALKER:		multiplicator = 32.0f;  break;
+        case ENTRY_SUCCUBUS:		multiplicator = 22.1f;   break;
+        case ENTRY_FELHUNTER:		multiplicator = 20.5f;   break;
+        case ENTRY_FELGUARD:		multiplicator = 30.0f;  break;
+        case ENTRY_BLOODWORM:		multiplicator = 1.0f;   break;
+		case ENTRY_WATER_ELEMENTAL:	multiplicator = 60.0f;	break;
+		case 31216:					multiplicator = 50.0f;	break;
+		case ENTRY_GHOUL:			multiplicator = 60.0f;	break;
+		case 27829:					multiplicator = 60.0f;	break;
+        default:                multiplicator = 25.0f;  break;
     }
 
     float value = GetModifierValue(unitMod, BASE_VALUE) + GetCreateHealth();
@@ -1323,12 +1327,12 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
                 }
             }
 
-            bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.22f * mod;
-            SetBonusDamage(int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.1287f * mod));
+            bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 1.22f * mod;
+            SetBonusDamage(int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.06435f * mod));
         }
         else if (IsPetGhoul()) //ghouls benefit from deathknight's attack power (may be summon pet or not)
         {
-            bonusAP = owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.22f;
+            bonusAP = owner->GetTotalAttackPowerValue(BASE_ATTACK) * 1.22f;
             SetBonusDamage(int32(owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.1287f));
         }
         else if (IsSpiritWolf()) //wolf benefit from shaman's attack power
@@ -1348,7 +1352,7 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
             if (maximum < 0)
                 maximum = 0;
             SetBonusDamage(int32(maximum * 0.15f));
-            bonusAP = maximum * 0.57f;
+            bonusAP = maximum * 2.57f;
         }
         //water elementals benefit from mage's frost damage
         else if (GetEntry() == ENTRY_WATER_ELEMENTAL)

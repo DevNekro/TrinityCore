@@ -668,8 +668,8 @@ class spell_dk_icebound_fortitude : public SpellScriptLoader
                     int32 value = amount;
                     uint32 defValue = uint32(caster->ToPlayer()->GetSkillValue(SKILL_DEFENSE) + caster->ToPlayer()->GetRatingBonusValue(CR_DEFENSE_SKILL));
 
-                    if (defValue > 400)
-                        value -= int32((defValue - 400) * 0.15);
+                    if (defValue > 1275)
+                        value -= int32((defValue - 1275) * 0.15);
 
                     // Glyph of Icebound Fortitude
                     if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_DK_GLYPH_OF_ICEBOUND_FORTITUDE, EFFECT_0))
