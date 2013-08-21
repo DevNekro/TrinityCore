@@ -2148,6 +2148,10 @@ void Spell::EffectSummonChangeItem(SpellEffIndex effIndex)
     for (uint8 j = PERM_ENCHANTMENT_SLOT; j <= TEMP_ENCHANTMENT_SLOT; ++j)
         if (m_CastItem->GetEnchantmentId(EnchantmentSlot(j)))
             pNewItem->SetEnchantment(EnchantmentSlot(j), m_CastItem->GetEnchantmentId(EnchantmentSlot(j)), m_CastItem->GetEnchantmentDuration(EnchantmentSlot(j)), m_CastItem->GetEnchantmentCharges(EnchantmentSlot(j)));
+	
+	for (uint8 j = SOCK_ENCHANTMENT_SLOT; j <= SOCK_ENCHANTMENT_SLOT_3; ++j)
+		if (m_CastItem->GetEnchantmentId(EnchantmentSlot(j)))
+			pNewItem->SetEnchantment(EnchantmentSlot(j), m_CastItem->GetEnchantmentId(EnchantmentSlot(j)),m_CastItem->GetEnchantmentDuration(EnchantmentSlot(j)),m_CastItem->GetEnchantmentCharges(EnchantmentSlot(j)));
 
     if (m_CastItem->GetUInt32Value(ITEM_FIELD_DURABILITY) < m_CastItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY))
     {
