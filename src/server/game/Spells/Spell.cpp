@@ -4813,7 +4813,12 @@ SpellCastResult Spell::CheckCast(bool strict)
             if (m_triggeredByAuraSpell)
                 return SPELL_FAILED_DONT_REPORT;
             else
-                return SPELL_FAILED_NOT_READY;
+			{
+				if (m_spellInfo->Id == 15473 || m_spellInfo->Id == 46584)
+					return SPELL_FAILED_FIZZLE;
+				else
+					return SPELL_FAILED_NOT_READY;
+			}
         }
     }
 
@@ -4825,7 +4830,12 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     // Check global cooldown
     if (strict && !(_triggeredCastFlags & TRIGGERED_IGNORE_GCD) && HasGlobalCooldown())
-        return SPELL_FAILED_NOT_READY;
+	{
+		if (m_spellInfo->Id == 15473 || m_spellInfo->Id == 46584)
+			return SPELL_FAILED_FIZZLE;
+		else
+			return SPELL_FAILED_NOT_READY;
+	}
 
     // only triggered spells can be processed an ended battleground
     if (!IsTriggered() && m_caster->GetTypeId() == TYPEID_PLAYER)
