@@ -1337,6 +1337,7 @@ void AddBattlegroundScripts()
 #ifdef SCRIPTS
 /* This is where custom scripts' loading functions should be declared. */
 
+void AddSC_CPWS_Transmogrification();
 #endif
 
 void AddCustomScripts()
@@ -1344,5 +1345,6 @@ void AddCustomScripts()
 #ifdef SCRIPTS
     /* This is where custom scripts should be added. */
 
+    AddSC_CPWS_Transmogrification();
 #endif
 }
