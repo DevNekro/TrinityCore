@@ -8,7 +8,7 @@ Killstreak Script by Nekro
 #include "Chat.h"
 #include "Language.h"
 
-std::string GetNameLink(Player* player)
+std::string GetNameColor(Player* player)
 {
         std::string name = player->GetName();
         std::string color;
@@ -45,7 +45,7 @@ std::string GetNameLink(Player* player)
                 color = "|cffC79C6E";
                 break;
         }
-        return "|Hplayer:"+name+"|h|cffFFFFFF["+color+name+"|cffFFFFFF]|h|r";
+        return color + name + "|cffFFFFFF";
 }
 
 class Killstreak : public PlayerScript
@@ -60,6 +60,8 @@ public:
 
 	void OnPVPKill(Player* killer, Player* killed)
 	{
+		if (killer->getLevel() == 255 && killed->getLevel() == 255)
+		{
 		QueryResult result = CharacterDatabase.PQuery("SELECT killstreak FROM killstreaks WHERE guid = %u", killer->GetGUID());
 		if(result)
 		{
@@ -77,7 +79,7 @@ public:
 				if(global == 1)
 				{
 					char msg[200];
-					sprintf(msg, "%s is %s. %d kills!", killer->GetName().c_str(), title, current); 
+					sprintf(msg, "%s is %s. %d kills!", GetNameColor(killer).c_str(), title, current); 
 					sWorld->SendServerMessage(SERVER_MSG_STRING, msg);
 					std::string str = msg;
 
@@ -89,8 +91,8 @@ public:
 				{
 					if(killer->GetSession())
 					{
-						ChatHandler(killer->GetSession()).PSendSysMessage("%s is %s. %d kills!", killer->GetName().c_str(), title, current);
-						killer->GetSession()->SendNotification("%s is %s. %d kills!", killer->GetName().c_str(), title, current);
+						ChatHandler(killer->GetSession()).PSendSysMessage("%s is %s. %d kills!", GetNameColor(killer).c_str(), title, current);
+						killer->GetSession()->SendNotification("%s is %s. %d kills!", GetNameColor(killer).c_str(), title, current);
 					}
 				}
 			}
@@ -116,7 +118,7 @@ public:
 				if(global == 1)
 				{
 					char msg[200];
-					sprintf(msg, "%s's %s killstreak has been ended by %s", killed->GetName().c_str(), title, killer->GetName().c_str());
+					sprintf(msg, "%s's %s killstreak has been ended by %s", GetNameColor(killed).c_str(), title, GetNameColor(killer).c_str());
 					sWorld->SendServerMessage(SERVER_MSG_STRING, msg);
 					std::string str = msg;
 
@@ -128,13 +130,14 @@ public:
 				{
 					if(killer->GetSession())
 					{
-						ChatHandler(killer->GetSession()).PSendSysMessage("%s's %s killstreak has been ended by %s", killed->GetName().c_str(), title, killer->GetName().c_str());
-						killer->GetSession()->SendNotification("%s's %s killstreak has been ended by %s", killed->GetName().c_str(), title, killer->GetName().c_str());
+						ChatHandler(killer->GetSession()).PSendSysMessage("%s's %s killstreak has been ended by %s", GetNameColor(killed).c_str(), title, GetNameColor(killer).c_str());
+						killer->GetSession()->SendNotification("%s's %s killstreak has been ended by %s", GetNameColor(killed).c_str(), title, GetNameColor(killer).c_str());
 					}
 				}
 			}
 			CharacterDatabase.PQuery("DELETE FROM killstreaks WHERE guid = %u", killed->GetGUID());
 		}
+	}
 	}
 };
 
