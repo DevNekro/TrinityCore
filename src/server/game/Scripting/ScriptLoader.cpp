@@ -1338,6 +1338,10 @@ void AddBattlegroundScripts()
 /* This is where custom scripts' loading functions should be declared. */
 
 void AddSC_CPWS_Transmogrification();
+void AddSC_Professions_NPC();
+void AddSC_npc_enchantment();
+void AddSC_Npc_Beastmaster();
+void AddSC_Killstreak();
 #endif
 
 void AddCustomScripts()
@@ -1346,5 +1350,9 @@ void AddCustomScripts()
     /* This is where custom scripts should be added. */
 
     AddSC_CPWS_Transmogrification();
+	AddSC_Professions_NPC();
+	AddSC_npc_enchantment();
+	AddSC_Npc_Beastmaster();
+	AddSC_Killstreak();
 #endif
 }

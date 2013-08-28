@@ -13,6 +13,10 @@ set(scripts_STAT_SRCS
 	Custom/Transmogrification.h
 	Custom/Transmogrification.cpp
 	Custom/Transmogrifier.cpp
+	Custom/npc_beastmaster.cpp
+	Custom/npc_enchant.cpp
+	Custom/npc_profession.cpp
+	Custom/pvp_killstreak.cpp
 )
 
 message("  -> Prepared: Custom")
