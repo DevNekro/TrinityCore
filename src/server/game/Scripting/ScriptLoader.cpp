@@ -1342,6 +1342,9 @@ void AddSC_Professions_NPC();
 void AddSC_npc_enchantment();
 void AddSC_Npc_Beastmaster();
 void AddSC_Killstreak();
+void AddSC_NoFarming();
+void AddSC_Reset();
+void AddSC_arenateamranks();
 #endif
 
 void AddCustomScripts()
@@ -1354,5 +1357,8 @@ void AddCustomScripts()
 	AddSC_npc_enchantment();
 	AddSC_Npc_Beastmaster();
 	AddSC_Killstreak();
+	AddSC_NoFarming();
+	AddSC_Reset();
+	AddSC_arenateamranks();
 #endif
 }

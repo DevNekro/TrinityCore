@@ -16,7 +16,10 @@ set(scripts_STAT_SRCS
 	Custom/npc_beastmaster.cpp
 	Custom/npc_enchant.cpp
 	Custom/npc_profession.cpp
+	Custom/npc_arena.cpp
 	Custom/pvp_killstreak.cpp
+	Custom/pvp_duel_end.cpp
+	Custom/sec_anti_farming.cpp
 )
 
 message("  -> Prepared: Custom")
