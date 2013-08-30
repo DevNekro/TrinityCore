@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "../../../scripts/Custom/Transmogrification.h"
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "WorldPacket.h"
@@ -2158,6 +2159,27 @@ void Spell::EffectSummonChangeItem(SpellEffIndex effIndex)
         double lossPercent = 1 - m_CastItem->GetUInt32Value(ITEM_FIELD_DURABILITY) / double(m_CastItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY));
         player->DurabilityLoss(pNewItem, lossPercent);
     }
+
+	if (sTransmogrification->GetFakeEntry(m_CastItem->GetGUID()))
+	{
+		sTransmogrification->SetFakeEntry(m_caster->ToPlayer(), sTransmogrification->GetFakeEntry(m_CastItem->GetGUID()), pNewItem->GetTemplate()->InventoryType, pNewItem);
+		sTransmogrification->DeleteFakeEntry(m_caster->ToPlayer(), m_CastItem->GetTemplate()->InventoryType, m_CastItem);
+		if (m_caster->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, 0))
+		{
+			if (sTransmogrification->GetFakeEntry(m_caster->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, 0)->GetGUID()))
+			{
+				m_caster->ToPlayer()->SetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID, sTransmogrification->GetFakeEntry(m_caster->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0,0)->GetGUID()));
+			}
+			else
+			{
+				m_caster->ToPlayer()->SetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID, m_caster->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, 0)->GetEntry());
+			}
+		}
+		else
+		{
+			m_caster->ToPlayer()->SetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID, 0);
+		}
+	}
 
     if (player->IsInventoryPos(pos))
     {
