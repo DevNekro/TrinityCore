@@ -7529,6 +7529,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
 
     // in PvP, any not controlled zone (except zone->team == 6, default case)
     // in PvE, only opposition team capital
+	/*
     switch (zone->team)
     {
         case AREATEAM_ALLY:
@@ -7544,7 +7545,8 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
         default:                                            // 6 in fact
             pvpInfo.IsInHostileArea = false;
             break;
-    }
+    }*/
+	pvpInfo.IsInFFAPvPArea = true;
 
     // Treat players having a quest flagging for PvP as always in hostile area
     pvpInfo.IsHostile = pvpInfo.IsInHostileArea || HasPvPForcingQuest();
