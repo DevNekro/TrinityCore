@@ -30,7 +30,7 @@ class NoFarming : public PlayerScript
 			if(result)
 				WorldDatabase.PExecute("UPDATE `anti-farm log` SET `Warning` = Warning + 1 WHERE `guid` = %u", killer->GetGUID());
 			else
-				WorldDatabase.PExecute("INSERT INTO `anti-farm log` (`guid`, `Warning`) VALUES (%u, %u, %u)", killer->GetGUID(), Warning);
+				WorldDatabase.PExecute("INSERT INTO `anti-farm log` (`guid`, `Warning`) VALUES (%u, %u)", killer->GetGUID(), Warning);
 
 			result = WorldDatabase.PQuery("SELECT `Warning` FROM `anti-farm log` WHERE `guid` = %u AND `Warning` >= 5 ", killer->GetGUID());
 			if(result)
