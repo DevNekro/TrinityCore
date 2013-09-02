@@ -28,6 +28,7 @@
 #    CHARACTER DELETE OPTIONS
 #    CUSTOM SERVER OPTIONS
 #    LOGGING SYSTEM SETTINGS
+#    PACKET SPOOF PROTECTION SETTINGS
 #
 ###################################################################################################
 
@@ -1106,7 +1107,6 @@ AllowTickets = 1
 
 DungeonFinder.OptionsMask = 1
 
-
 #
 #   DBC.EnforceItemAttributes
 #        Description: Disallow overriding item attributes stored in DBC files with values from the
@@ -1133,10 +1133,10 @@ RBAC.DefaultGroups = ""
 
 #
 #   Account.PasswordChangeSecurity
-#        Description: Controls how secure you want the password changes to be.
-#        Default:     2 - RBAC (RBAC en- or disables Email confirmation per group)
+#        Description: Controls how secure the password changes are.
+#        Default:     0 - None (Old and new password)
 #                     1 - Email (Email confirmation necessary)
-#                     0 - None (Just Old and new password comparision. Default.)
+#                     2 - RBAC (RBAC enable or disables email confirmation per group)
 
 Account.PasswordChangeSecurity = 0
 
@@ -2847,6 +2847,8 @@ Transmogrification.NotAllowed = ""
 
 #
 #    SET FEATURE
+#        Default:    0 - Ban Account
+#                    2 - Ban IP
 #
 #    Transmogrification.EnableSets
 #        Description: Enables / Disables the set feature. If you want permanent disable, check Transmogrification.h
