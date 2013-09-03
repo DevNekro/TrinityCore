@@ -370,7 +370,7 @@ enum RBACPermissions
     RBAC_PERM_COMMAND_NAMEANNOUNCE                           = 469,
     RBAC_PERM_COMMAND_NOTIFY                                 = 470,
     RBAC_PERM_COMMAND_WHISPERS                               = 471,
-
+	RBAC_CUSTOM_COMMAND_CHAT								 = 1000,
     // custom permissions 1000+
     RBAC_PERM_MAX
 };

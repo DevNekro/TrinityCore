@@ -20,6 +20,7 @@ set(scripts_STAT_SRCS
 	Custom/pvp_killstreak.cpp
 	Custom/pvp_duel_end.cpp
 	Custom/sec_anti_farming.cpp
+	Custom/world_chat.cpp
 )
 
 message("  -> Prepared: Custom")

@@ -1397,6 +1397,7 @@ void AddSC_Killstreak();
 void AddSC_NoFarming();
 void AddSC_Reset();
 void AddSC_arenateamranks();
+void AddSC_cs_world_chat();
 #endif
 
 void AddCustomScripts()
@@ -1412,5 +1413,6 @@ void AddCustomScripts()
 	AddSC_NoFarming();
 	AddSC_Reset();
 	AddSC_arenateamranks();
+	AddSC_cs_world_chat();
 #endif
 }
