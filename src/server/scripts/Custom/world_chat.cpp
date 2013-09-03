@@ -75,10 +75,106 @@ public:
 		Player * player = handler->GetSession()->GetPlayer();
  
 		msg += "|cff1eff00[World]";
-		//if (player->GetTeam() == ALLIANCE)
-			//msg += "\124Tinterface\\TARGETINGFRAME\\UI-PVP-Alliance.blp:40:40:0:-1\124t";
-		//else
-			//msg += "\124Tinterface\\TARGETINGFRAME\\UI-PVP-Horde.blp:40:40:0:-1\124t";
+		if (player->GetTeam() == ALLIANCE)
+			msg += "|TInterface\\TARGETINGFRAME\\UI-PVP-Alliance.blp:30:30:0:-4|t";
+		else
+			msg += "|TInterface\\TARGETINGFRAME\\UI-PVP-Horde.blp:30:30:0:-4|t";
+		switch (player->getORace())
+		{
+			case RACE_HUMAN:
+				if (player->getGender() == GENDER_MALE)
+					msg += "|TInterface\\Icons\\Achievement_Character_Human_Male.blp:20:20:0:0|t";
+				else
+					msg += "|TInterface\\Icons\\Achievement_Character_Human_Female.blp:20:20:0:0|t";
+				break;
+			case RACE_ORC:
+				if (player->getGender() == GENDER_MALE)
+					msg += "|TInterface\\Icons\\Achievement_Character_Orc_Male.blp:20:20:0:0|t";
+				else
+					msg += "|TInterface\\Icons\\Achievement_Character_Orc_Female.blp:20:20:0:0|t";
+				break;
+			case RACE_DWARF:
+				if (player->getGender() == GENDER_MALE)
+					msg += "|TInterface\\Icons\\Achievement_Character_Dwarf_Male.blp:20:20:0:0|t";
+				else
+					msg += "|TInterface\\Icons\\Achievement_Character_Dwarf_Female.blp:20:20:0:0|t";
+				break;
+			case RACE_NIGHTELF:
+				if (player->getGender() == GENDER_MALE)
+					msg += "|TInterface\\Icons\\Achievement_Character_Nightelf_Male.blp:20:20:0:0|t";
+				else
+					msg += "|TInterface\\Icons\\Achievement_Character_Nightelf_Female.blp:20:20:0:0|t";
+				break;
+			case RACE_UNDEAD_PLAYER:
+				if (player->getGender() == GENDER_MALE)
+					msg += "|TInterface\\Icons\\Achievement_Character_Undead_Male.blp:20:20:0:0|t";
+				else
+					msg += "|TInterface\\Icons\\Achievement_Character_Undead_Female.blp:20:20:0:0|t";
+				break;
+			case RACE_TAUREN:
+				if (player->getGender() == GENDER_MALE)
+					msg += "|TInterface\\Icons\\Achievement_Character_Tauren_Male.blp:20:20:0:0|t";
+				else
+					msg += "|TInterface\\Icons\\Achievement_Character_Tauren_Female.blp:20:20:0:0|t";
+				break;
+			case RACE_GNOME:
+				if (player->getGender() == GENDER_MALE)
+					msg += "|TInterface\\Icons\\Achievement_Character_Gnome_Male.blp:20:20:0:0|t";
+				else
+					msg += "|TInterface\\Icons\\Achievement_Character_Gnome_Female.blp:20:20:0:0|t";
+				break;
+			case RACE_TROLL:
+				if (player->getGender() == GENDER_MALE)
+					msg += "|TInterface\\Icons\\Achievement_Character_Troll_Male.blp:20:20:0:0|t";
+				else
+					msg += "|TInterface\\Icons\\Achievement_Character_Troll_Female.blp:20:20:0:0|t";
+				break;
+			case RACE_BLOODELF:
+				if (player->getGender() == GENDER_MALE)
+					msg += "|TInterface\\Icons\\Achievement_Character_Bloodelf_Male.blp:20:20:0:0|t";
+				else
+					msg += "|TInterface\\Icons\\Achievement_Character_Bloodelf_Female.blp:20:20:0:0|t";
+				break;
+			case RACE_DRAENEI:
+				if (player->getGender() == GENDER_MALE)
+					msg += "|TInterface\\Icons\\Achievement_Character_Draenei_Male.blp:20:20:0:0|t";
+				else
+					msg += "|TInterface\\Icons\\Achievement_Character_Draenei_Female.blp:20:20:0:0|t";
+				break;
+		}
+		switch(player->getClass())
+		{
+			case CLASS_WARRIOR:
+				msg += "|TInterface\\Icons\\inv_sword_27.blp:20:20:0:0|t";
+				break;
+			case CLASS_PALADIN:
+				msg += "|TInterface\\Icons\\inv_hammer_01.blp:20:20:0:0|t";
+				break;
+			case CLASS_HUNTER:
+				msg += "|TInterface\\Icons\\inv_weapon_bow_07.blp:20:20:0:0|t";
+				break;
+			case CLASS_ROGUE:
+				msg += "|TInterface\\Icons\\inv_throwingknife_04.blp:20:20:0:0|t";
+				break;
+			case CLASS_PRIEST:
+				msg += "|TInterface\\Icons\\inv_staff_30.blp:20:20:0:0|t";
+				break;
+			case CLASS_DEATH_KNIGHT:
+				msg += "|TInterface\\Icons\\spell_deathknight_classicon.blp:20:20:0:0|t";
+				break;
+			case CLASS_SHAMAN:
+				msg += "|TInterface\\Icons\\inv_jewelry_talisman_04.blp:20:20:0:0|t";
+				break;
+			case CLASS_MAGE:
+				msg += "|TInterface\\Icons\\inv_staff_13.blp:20:20:0:0|t";
+				break;
+			case CLASS_WARLOCK:
+				msg += "|TInterface\\Icons\\spell_nature_drowsy.blp:20:20:0:0|t";
+				break;
+			case CLASS_DRUID:
+				msg += "|TInterface\\Icons\\inv_misc_monsterclaw_04.blp:20:20:0:0|t";
+				break;
+		}
 		msg += GetNameLink(player);
 		msg += ":|cfffaeb00";
 		msg += args;
