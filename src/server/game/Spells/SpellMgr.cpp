@@ -3084,6 +3084,9 @@ void SpellMgr::LoadSpellInfoCorrections()
 				spellInfo->Effects[EFFECT_0].BasePoints = -1.5*IN_MILLISECONDS*0.66;
 				spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_CASTER;
 				break;
+			case 52212: // Death and Decay
+				spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_INVISIBLE;
+				break;
             case 53096: // Quetz'lun's Judgment
                 spellInfo->MaxAffectedTargets = 1;
                 break;
