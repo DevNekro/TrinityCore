@@ -3060,6 +3060,43 @@ class spell_gen_seaforium_blast : public SpellScriptLoader
         }
 };
 
+class spell_gen_shadowmeld : public SpellScriptLoader
+{
+    public:
+        spell_gen_shadowmeld() : SpellScriptLoader("spell_gen_shadowmeld") {}
+ 
+        class spell_gen_shadowmeld_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_gen_shadowmeld_SpellScript);
+ 
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                Unit *caster = GetCaster();
+                if (!caster)
+                    return;
+ 
+                caster->InterruptSpell(CURRENT_AUTOREPEAT_SPELL); // break Auto Shot and autohit
+                caster->InterruptSpell(CURRENT_CHANNELED_SPELL); // break channeled spells
+ 
+                if (Player *pCaster = caster->ToPlayer()) // if is a creature instant exits combat, else check if someone in party is in combat in visibility distance
+                    pCaster->SendAttackSwingCancelAttack();
+ 
+                if (!caster->GetInstanceScript() || !caster->GetInstanceScript()->IsEncounterInProgress()) //Don't leave combat if you are in combat with a boss
+                    caster->CombatStop(); // isn't necessary to call AttackStop because is just called in CombatStop
+            }
+ 
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_gen_shadowmeld_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
+            }
+        };
+ 
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_gen_shadowmeld_SpellScript();
+        }
+};
+
 enum SpectatorCheerTrigger
 {
     EMOTE_ONE_SHOT_CHEER        = 4,
@@ -3697,6 +3734,7 @@ void AddSC_generic_spell_scripts()
     new spell_gen_remove_flight_auras();
     new spell_gen_replenishment();
     new spell_gen_seaforium_blast();
+    new spell_gen_shadowmeld();
     new spell_gen_spectator_cheer_trigger();
     new spell_gen_spirit_healer_res();
     new spell_gen_summon_elemental("spell_gen_summon_fire_elemental", SPELL_SUMMON_FIRE_ELEMENTAL);
