@@ -3130,8 +3130,16 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 36350: // They Must Burn Bomb Aura (self)
                 spellInfo->Effects[EFFECT_0].TriggerSpell = 36325; // They Must Burn Bomb Drop (DND)
                 break;
+            case 5174: // Slice and Dice R1
+            case 6774: // Slice and Dice R2
+            case 52916: // Honor Among Thieves
             case 49838: // Stop Time
+            case 3600: // Earthbind totem effect
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
+                break;
+            case 50526: //Wandering Plague
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
                 break;
             case 61407: // Energize Cores
             case 62136: // Energize Cores
