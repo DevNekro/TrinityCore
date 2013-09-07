@@ -3084,6 +3084,11 @@ void SpellMgr::LoadSpellInfoCorrections()
 			case 52212: // Death and Decay
 				spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_INVISIBLE;
 				break;
+            case 53480: // Roar of Sacrifice Split Damage
+                spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_APPLY_AURA;
+                spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_SPLIT_DAMAGE_PCT;
+                spellInfo->Effects[EFFECT_1].MiscValue = 127;
+                break;
             case 53096: // Quetz'lun's Judgment
                 spellInfo->MaxAffectedTargets = 1;
                 break;

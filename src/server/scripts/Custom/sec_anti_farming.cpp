@@ -20,7 +20,6 @@ class NoFarming : public PlayerScript
 			WorldPacket data(SMSG_NOTIFICATION, (str.size()+1));
 			data << str;
 			sWorld->SendGlobalGMMessage(&data); 
-			TC_LOG_ERROR(LOG_FILTER_GENERAL, "here");
 			QueryResult result = WorldDatabase.PQuery("SELECT `Warning` FROM `anti-farm log` WHERE `guid` = %u", killer->GetGUID());
 			if(result)
 			{
