@@ -421,6 +421,23 @@ class spell_hun_masters_call : public SpellScriptLoader
                 return true;
             }
 
+            SpellCastResult CheckIfPetInLOS()
+            {
+                if (Player* player = GetCaster()->ToPlayer())
+                {
+                    if (Pet* pet = player->GetPet())
+                    {
+                        if (pet->isDead())
+                            return SPELL_FAILED_NO_PET;
+                        float x, y, z;
+                        pet->GetPosition(x, y, z);
+                        if (player->IsWithinLOS(x, y, z))
+                            return SPELL_CAST_OK;
+                    }
+                }
+                return SPELL_FAILED_LINE_OF_SIGHT;
+            }
+
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 if (Unit* ally = GetHitUnit())
@@ -430,6 +447,10 @@ class spell_hun_masters_call : public SpellScriptLoader
                             TriggerCastFlags castMask = TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_IGNORE_CASTER_AURASTATE);
                             target->CastSpell(ally, GetEffectValue(), castMask);
                             target->CastSpell(ally, GetSpellInfo()->Effects[EFFECT_0].CalcValue(), castMask);
+                            target->RemoveMovementImpairingAuras(); // remove already applied root and snare from pet
+                            caster->RemoveMovementImpairingAuras(); // remove already applied root and snare from pet's target
+                            caster->CastSpell(ally, GetEffectValue(), castMask); // this should remove already applied root and snare from pet's target, but not working
+                            caster->CastSpell(ally, GetSpellInfo()->Effects[EFFECT_0].CalcValue(), castMask); // apply 4s root and snare immunity to pet's target
                         }
             }
 
@@ -447,6 +468,7 @@ class spell_hun_masters_call : public SpellScriptLoader
             {
                 OnEffectHitTarget += SpellEffectFn(spell_hun_masters_call_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
                 OnEffectHitTarget += SpellEffectFn(spell_hun_masters_call_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+                OnCheckCast += SpellCheckCastFn(spell_hun_masters_call_SpellScript::CheckIfPetInLOS);
             }
         };
 
