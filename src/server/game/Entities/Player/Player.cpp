@@ -7592,7 +7592,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
             pvpInfo.IsInHostileArea = false;
             break;
     }
-	pvpInfo.IsInFFAPvPArea = true;
+	//pvpInfo.IsInFFAPvPArea = true;
 
     // Treat players having a quest flagging for PvP as always in hostile area
     pvpInfo.IsHostile = pvpInfo.IsInHostileArea || HasPvPForcingQuest();
