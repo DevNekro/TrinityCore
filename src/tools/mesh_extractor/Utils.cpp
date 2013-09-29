@@ -49,13 +49,12 @@ void Utils::Reverse(char word[])
 std::string Utils::ReadString( FILE* file )
 {
     std::string ret;
-    int i = 0;
     while (true)
     {
         char b;
         if (fread(&b, sizeof(char), 1, file) != 1 || b == 0)
             break;
-        ret[i++] = b;
+        ret.push_back(b);
     }
     return ret;
 }
@@ -72,17 +71,17 @@ uint32 Utils::Size( FILE* file )
     return size;
 }
 
-Vector3 Utils::ToRecast( Vector3 val )
+Vector3 Utils::ToRecast(const Vector3& val )
 {
     return Vector3(-val.y, val.z, -val.x);
 }
 
-std::string Utils::GetAdtPath( std::string world, int x, int y )
+std::string Utils::GetAdtPath(const std::string& world, int x, int y )
 {
     return "World\\Maps\\" + world + "\\" + world + "_" + Utils::ToString(x) + "_" + Utils::ToString(y) + ".adt";
 }
 
-std::string Utils::FixModelPath( std::string path )
+std::string Utils::FixModelPath(const std::string& path )
 {
     return Utils::GetPathBase(path) + ".M2";
 }
@@ -92,14 +91,14 @@ G3D::Matrix4 Utils::RotationX(float angle)
     float _cos = cos(angle);
     float _sin = sin(angle);
     G3D::Matrix4 ret = G3D::Matrix4::identity();
+    ret[1][1] = _cos;
+    ret[2][1] = _sin;
+    ret[1][2] = -_sin;
     ret[2][2] = _cos;
-    ret[2][3] = _sin;
-    ret[3][2] = -_sin;
-    ret[3][3] = _cos;
     return ret;
 }
 
-G3D::Matrix4 Utils::GetTransformation(IDefinition def)
+G3D::Matrix4 Utils::GetTransformation(const IDefinition& def)
 {
     G3D::Matrix4 translation;
     if (def.Position.x == 0.0f && def.Position.y == 0.0f && def.Position.z == 0.0f)
@@ -119,10 +118,10 @@ G3D::Matrix4 Utils::RotationY( float angle )
     float _cos = cos(angle);
     float _sin = sin(angle);
     G3D::Matrix4 ret = G3D::Matrix4::identity();
-    ret[1][1] = _cos;
-    ret[1][3] = -_sin;
-    ret[3][1] = _sin;
-    ret[3][3] = _cos;
+    ret[0][0] = _cos;
+    ret[3][0] = -_sin;
+    ret[0][3] = _sin;
+    ret[2][2] = _cos;
     return ret;
 }
 
@@ -131,10 +130,10 @@ G3D::Matrix4 Utils::RotationZ( float angle )
     float _cos = cos(angle);
     float _sin = sin(angle);
     G3D::Matrix4 ret = G3D::Matrix4::identity();
+    ret[0][0] = _cos;
+    ret[1][0] = _sin;
+    ret[0][1] = -_sin;
     ret[1][1] = _cos;
-    ret[1][2] = _sin;
-    ret[2][1] = -_sin;
-    ret[2][2] = _cos;
     return ret;
 }
 
@@ -143,16 +142,16 @@ float Utils::ToRadians( float degrees )
     return Constants::PI * degrees / 180.0f;
 }
 
-Vector3 Utils::VectorTransform( Vector3 vec, G3D::Matrix4 matrix )
+Vector3 Utils::VectorTransform(const Vector3& vec, const G3D::Matrix4& matrix )
 {
     Vector3 ret;
-    ret.x = vec.x * matrix[1][1] + vec.y * matrix[2][1] + vec.z * matrix[3][1] + matrix[4][1];
-    ret.y = vec.x * matrix[1][2] + vec.y * matrix[2][2] + vec.z * matrix[3][2] + matrix[4][2];
-    ret.z = vec.x * matrix[1][3] + vec.y * matrix[2][3] + vec.z * matrix[3][3] + matrix[4][3];
+    ret.x = vec.x * matrix[0][0] + vec.y * matrix[1][0] + vec.z * matrix[2][0] + matrix[3][0];
+    ret.y = vec.x * matrix[0][1] + vec.y * matrix[1][1] + vec.z * matrix[2][1] + matrix[3][1];
+    ret.z = vec.x * matrix[0][2] + vec.y * matrix[1][2] + vec.z * matrix[2][2] + matrix[3][2];
     return ret;
 }
 
-std::string Utils::GetPathBase( std::string path )
+std::string Utils::GetPathBase(const std::string& path )
 {
     size_t lastIndex = path.find_last_of(".");
     if (lastIndex != std::string::npos)
@@ -168,7 +167,7 @@ Vector3 Vector3::Read( FILE* file )
     return ret;
 }
 
-Vector3 Utils::GetLiquidVert(G3D::Matrix4 transformation, Vector3 basePosition, float height, int /*x*/, int /*y*/)
+Vector3 Utils::GetLiquidVert(const G3D::Matrix4& transformation, Vector3 basePosition, float height, int /*x*/, int /*y*/)
 {
     if (Utils::Distance(height, 0.0f) > 0.5f)
         basePosition.z = 0.0f;
@@ -191,7 +190,7 @@ std::string Utils::Replace( std::string str, const std::string& oldStr, const st
     return str;
 }
 
-G3D::Matrix4 Utils::GetWmoDoodadTransformation( DoodadInstance inst, WorldModelDefinition root )
+G3D::Matrix4 Utils::GetWmoDoodadTransformation(const DoodadInstance& inst, const WorldModelDefinition& root )
 {
     G3D::Matrix4 rootTransformation = Utils::GetTransformation(root);
     G3D::Matrix4 translation = G3D::Matrix4::translation(inst.Position.x, inst.Position.y, inst.Position.z);
@@ -203,7 +202,7 @@ G3D::Matrix4 Utils::GetWmoDoodadTransformation( DoodadInstance inst, WorldModelD
     return scale * rotation * quatRotation ** translation * rootTransformation;
 }
 
-void Utils::SaveToDisk( FILE* stream, std::string path )
+void Utils::SaveToDisk( FILE* stream, const std::string& path )
 {
     FILE* disk = fopen(path.c_str(), "wb");
     if (!disk)
@@ -229,7 +228,7 @@ void Utils::SaveToDisk( FILE* stream, std::string path )
     delete [] data;
 }
 
-Vector3 Utils::ToWoWCoords( Vector3 vec )
+Vector3 Utils::ToWoWCoords(const Vector3& vec )
 {
     return Vector3(vec.x, -vec.z, vec.y);
 }
@@ -484,7 +483,8 @@ LiquidData LiquidData::Read(FILE* stream, LiquidHeader& header)
 H2ORenderMask H2ORenderMask::Read(FILE* stream)
 {
     H2ORenderMask ret;
-    if (int count = fread(&ret.Mask, sizeof(uint8), 8, stream) != 8)
+    int32 count;
+    if ((count = fread(&ret.Mask, sizeof(uint8), 8, stream)) != 8)
         printf("H2OHeader::Read: Failed to read some data expected 8, read %d\n", count);
     return ret;
 }

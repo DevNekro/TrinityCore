@@ -2784,7 +2784,7 @@ void Spell::EffectEnchantItemPerm(SpellEffIndex effIndex)
         if (!item_owner)
             return;
 
-        if (item_owner != player && player->GetSession()->HasPermission(RBAC_PERM_LOG_GM_TRADE))
+        if (item_owner != player && player->GetSession()->HasPermission(rbac::RBAC_PERM_LOG_GM_TRADE))
         {
             sLog->outCommand(player->GetSession()->GetAccountId(), "GM %s (Account: %u) enchanting(perm): %s (Entry: %d) for player: %s (Account: %u)",
                 player->GetName().c_str(), player->GetSession()->GetAccountId(),
@@ -2849,7 +2849,7 @@ void Spell::EffectEnchantItemPrismatic(SpellEffIndex effIndex)
     if (!item_owner)
         return;
 
-    if (item_owner != player && player->GetSession()->HasPermission(RBAC_PERM_LOG_GM_TRADE))
+    if (item_owner != player && player->GetSession()->HasPermission(rbac::RBAC_PERM_LOG_GM_TRADE))
     {
         sLog->outCommand(player->GetSession()->GetAccountId(), "GM %s (Account: %u) enchanting(perm): %s (Entry: %d) for player: %s (Account: %u)",
             player->GetName().c_str(), player->GetSession()->GetAccountId(),
@@ -2982,7 +2982,7 @@ void Spell::EffectEnchantItemTmp(SpellEffIndex effIndex)
     if (!item_owner)
         return;
 
-    if (item_owner != player && player->GetSession()->HasPermission(RBAC_PERM_LOG_GM_TRADE))
+    if (item_owner != player && player->GetSession()->HasPermission(rbac::RBAC_PERM_LOG_GM_TRADE))
     {
         sLog->outCommand(player->GetSession()->GetAccountId(), "GM %s (Account: %u) enchanting(temp): %s (Entry: %d) for player: %s (Account: %u)",
             player->GetName().c_str(), player->GetSession()->GetAccountId(),
@@ -5650,7 +5650,7 @@ void Spell::EffectActivateRune(SpellEffIndex effIndex)
     // Blood Tap
     if (m_spellInfo->Id == 45529 && count > 0)
     {
-        for (uint32 l = 0; l < MAX_RUNES && count > 0; ++l)
+        for (uint32 l = 0; l + 1 < MAX_RUNES && count > 0; ++l)
         {
             // Check if both runes are on cd as that is the only time when this needs to come into effect
             if ((player->GetRuneCooldown(l) && player->GetCurrentRune(l) == RuneType(m_spellInfo->Effects[effIndex].MiscValueB)) && (player->GetRuneCooldown(l+1) && player->GetCurrentRune(l+1) == RuneType(m_spellInfo->Effects[effIndex].MiscValueB)))

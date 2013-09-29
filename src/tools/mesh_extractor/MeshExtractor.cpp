@@ -18,18 +18,26 @@ CacheClass* Cache;
 void ExtractMMaps(std::set<uint32>& mapIds, uint32 threads, bool debug)
 {
     DBC* dbc = MPQHandler->GetDBC("Map");
+    printf("Map.dbc contains %u rows.\n", dbc->Records.size());
     for (std::vector<Record*>::iterator itr = dbc->Records.begin(); itr != dbc->Records.end(); ++itr)
     {
         uint32 mapId = (*itr)->Values[0];
 
         // Skip this map if a list of specific maps was provided and this one is not contained in it.
         if (!mapIds.empty() && mapIds.find(mapId) == mapIds.end())
+        {
+            if (debug)
+                printf("Map %u will not be built.\n", mapId);
             continue;
+        }
 
         std::string name = (*itr)->GetString(1);
         WDT wdt("World\\maps\\" + name + "\\" + name + ".wdt");
         if (!wdt.IsValid || wdt.IsGlobalModel)
+        {
+            printf("Could not find WDT data for map %u (%s)\n", mapId, name.c_str());
             continue;
+        }
         printf("Building %s MapId %u\n", name.c_str(), mapId);
         ContinentBuilder builder(name, mapId, &wdt, threads);
         builder.Build(debug);
@@ -43,12 +51,16 @@ void ExtractDBCs()
     std::string baseDBCPath = "dbc/";
     Utils::CreateDir(baseDBCPath);
 
-    // Populate list of DBC files
     std::set<std::string> DBCFiles;
+    const size_t extLen = strlen(".dbc");
+    // Populate list of DBC files
+    // We get the DBC names by going over the (guaranteed to exist) default locale files
+    // Then we look in other locale files in case that they are available.
     for (std::vector<std::string>::iterator itr = MPQHandler->LocaleFiles[MPQHandler->BaseLocale]->Files.begin(); itr != MPQHandler->LocaleFiles[MPQHandler->BaseLocale]->Files.end(); ++itr)
-        if (itr->rfind(".dbc") == itr->length() - strlen(".dbc"))
+        if (itr->rfind(".dbc") == itr->length() - extLen) // Check if the extension is ".dbc"
             DBCFiles.insert(*itr);
 
+    const size_t folderLen = strlen("DBFilesClient\\");
     // Iterate over all available locales
     for (std::set<uint32>::iterator itr = MPQHandler->AvailableLocales.begin(); itr != MPQHandler->AvailableLocales.end(); ++itr)
     {
@@ -65,7 +77,7 @@ void ExtractDBCs()
         Utils::SaveToDisk(MPQHandler->GetFile(component), path + component);
         // Extract the DBC files for the given locale
         for (std::set<std::string>::iterator itr2 = DBCFiles.begin(); itr2 != DBCFiles.end(); ++itr2)
-            Utils::SaveToDisk(MPQHandler->GetFileFrom(*itr2, MPQHandler->LocaleFiles[*itr]), path + (itr2->c_str() + strlen("DBFilesClient\\")));
+            Utils::SaveToDisk(MPQHandler->GetFileFrom(*itr2, MPQHandler->LocaleFiles[*itr]), path + (itr2->c_str() + folderLen));
     }
     printf("DBC extraction finished!\n");
 }
@@ -193,16 +205,18 @@ void ExtractGameobjectModels()
             fwrite(&model.Header.CountGroups, sizeof(uint32), 1, output);
             fwrite(&model.Header.WmoId, sizeof(uint32), 1, output);
 
+            const char grp[] = { 'G' , 'R' , 'P', ' ' };
             for (std::vector<WorldModelGroup>::iterator itr2 = model.Groups.begin(); itr2 != model.Groups.end(); ++itr2)
             {
-                fwrite(&itr2->Header.Flags, sizeof(uint32), 1, output);
-                fwrite(&itr2->Header.WmoId, sizeof(uint32), 1, output);
-                fwrite(&itr2->Header.BoundingBox[0], sizeof(uint32), 1, output);
-                fwrite(&itr2->Header.BoundingBox[1], sizeof(uint32), 1, output);
+                const WMOGroupHeader& header = itr2->Header;
+                fwrite(&header.Flags, sizeof(uint32), 1, output);
+                fwrite(&header.WmoId, sizeof(uint32), 1, output);
+                fwrite(&header.BoundingBox[0], sizeof(uint32), 1, output);
+                fwrite(&header.BoundingBox[1], sizeof(uint32), 1, output);
                 uint32 LiquidFlags = itr2->HasLiquidData ? 1 : 0;
                 fwrite(&LiquidFlags, sizeof(uint32), 1, output);
 
-                fwrite("GRP ", sizeof(char), 4, output);
+                fwrite(grp, sizeof(char), sizeof(grp), output);
                 uint32 k = 0;
                 uint32 mobaBatch = itr2->MOBALength / 12;
                 uint32* MobaEx = new uint32[mobaBatch*4];
@@ -216,7 +230,7 @@ void ExtractGameobjectModels()
                 fwrite(MobaEx, 4, k, output);
                 delete[] MobaEx;
 
-                // Note: still not finished
+                //@TODO: Finish this.
             }
 
             fclose(output);
@@ -242,7 +256,7 @@ bool HandleArgs(int argc, char** argv, uint32& threads, std::set<uint32>& mapLis
                 return false;
 
             threads = atoi(param);
-            printf("Using %i threads\n", threads);
+            printf("Using %u threads\n", threads);
         }
         else if (strcmp(argv[i], "--maps") == 0)
         {
@@ -326,18 +340,21 @@ void LoadTile(dtNavMesh*& navMesh, const char* tile)
 
 int main(int argc, char* argv[])
 {
-    if (!system("pause"))
-    {
-        printf("main: Error in system call to pause\n");
-        return -1;
-    }
-
+    system("pause");
+    _setmaxstdio(2048);
     uint32 threads = 4, extractFlags = 0;
     std::set<uint32> mapIds;
     bool debug = false;
 
     if (!HandleArgs(argc, argv, threads, mapIds, debug, extractFlags))
     {
+        PrintUsage();
+        return -1;
+    }
+
+    if (extractFlags == 0)
+    {
+        printf("You must provide a valid extractflag.\n");
         PrintUsage();
         return -1;
     }

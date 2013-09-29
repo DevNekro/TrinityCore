@@ -540,8 +540,11 @@ inline void KillRewarder::_RewardKillCredit(Player* player)
 {
     // 4.4. Give kill credit (player must not be in group, or he must be alive or without corpse).
     if (!_group || player->IsAlive() || !player->GetCorpse())
-        if (_victim->GetTypeId() == TYPEID_UNIT)
-            player->KilledMonster(_victim->ToCreature()->GetCreatureTemplate(), _victim->GetGUID());
+        if (Creature* target = _victim->ToCreature())
+        {
+            player->KilledMonster(target->GetCreatureTemplate(), target->GetGUID());
+            player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE, target->GetCreatureType(), 1, target);
+        }
 }
 
 void KillRewarder::_RewardPlayer(Player* player, bool isDungeon)
@@ -674,7 +677,7 @@ Player::Player(WorldSession* session): Unit(true)
     //m_pad = 0;
 
     // players always accept
-    if (!GetSession()->HasPermission(RBAC_PERM_CAN_FILTER_WHISPERS))
+    if (!GetSession()->HasPermission(rbac::RBAC_PERM_CAN_FILTER_WHISPERS))
         SetAcceptWhispers(true);
 
     m_curSelection = 0;
@@ -1031,7 +1034,7 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
         ? sWorld->getIntConfig(CONFIG_START_PLAYER_LEVEL)
         : sWorld->getIntConfig(CONFIG_START_HEROIC_PLAYER_LEVEL);
 
-    if (m_session->HasPermission(RBAC_PERM_USE_START_GM_LEVEL))
+    if (m_session->HasPermission(rbac::RBAC_PERM_USE_START_GM_LEVEL))
     {
         uint32 gm_level = sWorld->getIntConfig(CONFIG_START_GM_LEVEL);
         if (gm_level > start_level)
@@ -2112,7 +2115,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         return false;
     }
 
-    if (!GetSession()->HasPermission(RBAC_PERM_SKIP_CHECK_DISABLE_MAP) && DisableMgr::IsDisabledFor(DISABLE_TYPE_MAP, mapid, this))
+    if (!GetSession()->HasPermission(rbac::RBAC_PERM_SKIP_CHECK_DISABLE_MAP) && DisableMgr::IsDisabledFor(DISABLE_TYPE_MAP, mapid, this))
     {
         TC_LOG_ERROR(LOG_FILTER_MAPS, "Player (GUID: %u, name: %s) tried to enter a forbidden map %u", GetGUIDLow(), GetName().c_str(), mapid);
         SendTransferAborted(mapid, TRANSFER_ABORT_MAP_NOT_ALLOWED);
@@ -3170,7 +3173,7 @@ void Player::InitTalentForLevel()
         // if used more that have then reset
         if (m_usedTalentCount > talentPointsForLevel)
         {
-            if (!GetSession()->HasPermission(RBAC_PERM_SKIP_CHECK_MORE_TALENTS_THAN_ALLOWED))
+            if (!GetSession()->HasPermission(rbac::RBAC_PERM_SKIP_CHECK_MORE_TALENTS_THAN_ALLOWED))
                 resetTalents(true);
             else
                 SetFreeTalentPoints(0);
@@ -4050,7 +4053,7 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
             itr->second->state = PLAYERSPELL_REMOVED;
     }
 
-    RemoveAurasDueToSpell(spell_id);
+    RemoveOwnedAura(spell_id, GetGUID());
 
     // remove pet auras
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
@@ -17049,7 +17052,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     // check name limitations
     if (ObjectMgr::CheckPlayerName(m_name) != CHAR_NAME_SUCCESS ||
-        (!GetSession()->HasPermission(RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_RESERVEDNAME) &&
+        (!GetSession()->HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_RESERVEDNAME) &&
          sObjectMgr->IsReservedName(m_name)))
     {
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_ADD_AT_LOGIN_FLAG);
@@ -17588,7 +17591,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     outDebugValues();
 
     // GM state
-    if (GetSession()->HasPermission(RBAC_PERM_RESTORE_SAVED_GM_STATE))
+    if (GetSession()->HasPermission(rbac::RBAC_PERM_RESTORE_SAVED_GM_STATE))
     {
         switch (sWorld->getIntConfig(CONFIG_GM_LOGIN_STATE))
         {
@@ -19951,7 +19954,7 @@ void Player::outDebugValues() const
 void Player::UpdateSpeakTime()
 {
     // ignore chat spam protection for GMs in any mode
-    if (GetSession()->HasPermission(RBAC_PERM_SKIP_CHECK_CHAT_SPAM))
+    if (GetSession()->HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHAT_SPAM))
         return;
 
     time_t current = time (NULL);
@@ -20407,7 +20410,7 @@ void Player::TextEmote(const std::string& text)
 
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     BuildPlayerChat(&data, CHAT_MSG_EMOTE, _text, LANG_UNIVERSAL);
-    SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE), true, !GetSession()->HasPermission(RBAC_PERM_TWO_SIDE_INTERACTION_CHAT));
+    SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE), true, !GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHAT));
 }
 
 void Player::Whisper(const std::string& text, uint32 language, uint64 receiver)
@@ -22146,13 +22149,13 @@ bool Player::CanJoinToBattleground(Battleground const* bg) const
     if (HasAura(26013))
         return false;
 
-    if (bg->isArena() && !GetSession()->HasPermission(RBAC_PERM_JOIN_ARENAS))
+    if (bg->isArena() && !GetSession()->HasPermission(rbac::RBAC_PERM_JOIN_ARENAS))
         return false;
 
-    if (bg->IsRandom() && !GetSession()->HasPermission(RBAC_PERM_JOIN_RANDOM_BG))
+    if (bg->IsRandom() && !GetSession()->HasPermission(rbac::RBAC_PERM_JOIN_RANDOM_BG))
         return false;
 
-    if (!GetSession()->HasPermission(RBAC_PERM_JOIN_NORMAL_BG))
+    if (!GetSession()->HasPermission(rbac::RBAC_PERM_JOIN_NORMAL_BG))
         return false;
 
     return true;

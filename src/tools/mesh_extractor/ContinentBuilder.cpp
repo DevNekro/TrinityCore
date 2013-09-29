@@ -17,7 +17,7 @@ private:
     ContinentBuilder* cBuilder;
 public:
     BuilderThread(ContinentBuilder* _cBuilder, bool deb, dtNavMeshParams& params) : debug(deb), Params(params), cBuilder(_cBuilder), Free(true) {}
-    void SetData(int x, int y, int map, std::string cont) { X = x; Y = y; MapId = map; Continent = cont; }
+    void SetData(int x, int y, int map, const std::string& cont) { X = x; Y = y; MapId = map; Continent = cont; }
 
     int svc()
     {
@@ -25,7 +25,7 @@ public:
         printf("[%02i,%02i] Building tile\n", X, Y);
         TileBuilder builder(cBuilder, Continent, X, Y, MapId);
         char buff[100];
-        sprintf(buff, "mmaps/%03u%02u%02u.mmtile", MapId, Y, X);
+        sprintf(buff, "mmaps/%03u%02i%02i.mmtile", MapId, Y, X);
         FILE* f = fopen(buff, "r");
         if (f) // Check if file already exists.
         {
@@ -50,7 +50,7 @@ public:
             fclose(f);
         }
         dtFree(nav);
-        printf("[%02u,%02u] Tile Built!\n", X, Y);
+        printf("[%02i,%02i] Tile Built!\n", X, Y);
         Free = true;
         return 0;
     }
@@ -113,8 +113,8 @@ void ContinentBuilder::Build(bool debug)
     std::vector<BuilderThread*> Threads;
     for (uint32 i = 0; i < NumberOfThreads; ++i)
         Threads.push_back(new BuilderThread(this, debug, params));
-    printf("Map %s ( %i ) has %u tiles. Building them with %i threads\n", Continent.c_str(), MapId, uint32(TileMap->TileTable.size()), NumberOfThreads);
-    for (std::vector<TilePos>::iterator itr = TileMap->TileTable.begin(); itr != TileMap->TileTable.end(); ++itr)
+    printf("Map %s ( %u ) has %u tiles. Building them with %u threads\n", Continent.c_str(), MapId, uint32(TileMap->TileTable.size()), NumberOfThreads);
+    //for (std::vector<TilePos>::iterator itr = TileMap->TileTable.begin(); itr != TileMap->TileTable.end(); ++itr)
     {
         bool next = false;
         while (!next)
@@ -123,7 +123,7 @@ void ContinentBuilder::Build(bool debug)
             {
                 if ((*_th)->Free)
                 {
-                    (*_th)->SetData(itr->X, itr->Y, MapId, Continent);
+                    (*_th)->SetData(40/*itr->X*/, 29/*itr->Y*/, MapId, Continent);
                     (*_th)->activate();
                     next = true;
                     break;

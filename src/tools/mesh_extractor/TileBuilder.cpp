@@ -77,7 +77,7 @@ uint8* TileBuilder::Build(bool dbg, dtNavMeshParams& navMeshParams)
 {
     _Geometry = new Geometry();
     _Geometry->Transform = true;
-    ADT* adt = new ADT(Utils::GetAdtPath(World, X, Y));
+    ADT* adt = new ADT(Utils::GetAdtPath(World, X, Y), X, Y);
     adt->Read();
     _Geometry->AddAdt(adt);
     delete adt;
@@ -94,7 +94,7 @@ uint8* TileBuilder::Build(bool dbg, dtNavMeshParams& navMeshParams)
             if (tx == X && ty == Y)
                 continue;
 
-            ADT* _adt = new ADT(Utils::GetAdtPath(World, tx, ty));
+            ADT* _adt = new ADT(Utils::GetAdtPath(World, tx, ty), tx, ty);
             // If this condition is met, it means that this wdt does not contain the ADT
             if (!_adt->Data->Stream)
             {
@@ -113,12 +113,18 @@ uint8* TileBuilder::Build(bool dbg, dtNavMeshParams& navMeshParams)
         sprintf(buff, "mmaps/%s_%02u%02u.obj", World.c_str(), Y, X);
         FILE* debug = fopen(buff, "wb");
         for (uint32 i = 0; i < _Geometry->Vertices.size(); ++i)
-            fprintf(debug, "v %f %f %f\n", _Geometry->Vertices[i].x, _Geometry->Vertices[i].y, _Geometry->Vertices[i].z);
+        {
+            const Vector3& vector = _Geometry->Vertices[i];
+            fprintf(debug, "v %f %f %f\n", vector.x, vector.y, vector.z);
+        }
         for (uint32 i = 0; i < _Geometry->Triangles.size(); ++i)
-            fprintf(debug, "f %i %i %i\n", _Geometry->Triangles[i].V0 + 1, _Geometry->Triangles[i].V1 + 1, _Geometry->Triangles[i].V2 + 1);
+        {
+            const Triangle<uint32>& triangle = _Geometry->Triangles[i];
+            fprintf(debug, "f %u %u %u\n", triangle.V0 + 1, triangle.V1 + 1, triangle.V2 + 1);
+        }
         fclose(debug);
     }
-
+    return NULL;
     uint32 numVerts = _Geometry->Vertices.size();
     uint32 numTris = _Geometry->Triangles.size();
     float* vertices;
@@ -266,7 +272,7 @@ uint8* TileBuilder::Build(bool dbg, dtNavMeshParams& navMeshParams)
     // Offmesh-connection settings
     params.offMeshConCount = 0; // none for now
 
-    params.tileSize = Constants::VertexPerMap;
+    //params.tileSize = Constants::VertexPerMap;
 
     if (!params.polyCount || !params.polys || Constants::TilesPerMap * Constants::TilesPerMap == params.polyCount)
     {
