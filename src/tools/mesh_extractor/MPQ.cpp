@@ -103,16 +103,14 @@ void MPQFile::seekRelative(int offset)
 
 void MPQFile::close()
 {
-    if (buffer)
-        delete[] buffer;
+    delete[] buffer;
     buffer = 0;
     eof = true;
 }
 
 FILE* MPQFile::GetFileStream()
 {
-    FILE* file = NULL;
-    tmpfile_s(&file);
+    FILE* file = tmpfile();
     if (!file)
     {
         printf("Could not create temporary file. Please run as Administrator or root\n");

@@ -5,6 +5,7 @@
 #include "Model.h"
 #include "Define.h"
 #include "G3D/Matrix4.h"
+#include "G3D/Quat.h"
 #include <cstdio>
 
 WorldModelDefinition WorldModelDefinition::Read( FILE* file )
@@ -30,8 +31,6 @@ WorldModelDefinition WorldModelDefinition::Read( FILE* file )
 
 WorldModelHandler::WorldModelHandler( ADT* adt ) : ObjectDataHandler(adt), _definitions(NULL), _paths(NULL)
 {
-    /*if (!adt->HasObjectData)
-        return;*/
     ReadModelPaths();
     ReadDefinitions();
 }
@@ -80,37 +79,21 @@ void WorldModelHandler::ProcessInternal( MapChunk* mcnk )
     fseek(stream, mcnk->Source->Offset, SEEK_SET);
 }
 
-Vector3 TransformDoodadVertex(const IDefinition& def, Vector3& vec)
+void WorldModelHandler::InsertModelGeometry( std::vector<Vector3>& verts, std::vector<Triangle<uint32> >& tris, const WorldModelDefinition& def, WorldModelRoot* root, bool translate )
 {
-    float mapOffset = 17066.0f + (2 / 3.0f);
-    Vector3 MapPos = Vector3(mapOffset, 0, mapOffset);
-    G3D::Matrix4 rot = G3D::Matrix4::identity();
-    rot = rot.pitchDegrees(def.Rotation.y - 90);
-    rot = rot.yawDegrees(-def.Rotation.x);
-    rot = rot.rollDegrees(def.Rotation.z - 90);
-
-    Vector3 offset = def.Position - MapPos;
-
-    // Because homoMul wants a G3D::Vector3
-    G3D::Vector3 g3dvec(vec.x, vec.y, vec.z);
-    G3D::Vector3 g3dOffset(offset.x, offset.y, offset.z);
-    G3D::Vector3 ret = (rot.homoMul(g3dvec, 1)  * def.Scale()) + g3dOffset;
-    Vector3 ret2 = (Utils::VectorTransform(vec, rot) + def.Position - MapPos) * def.Scale();
-    return ret2; //Vector3(ret.x, ret.y, ret.z);
-}
-
-void WorldModelHandler::InsertModelGeometry( std::vector<Vector3>& verts, std::vector<Triangle<uint32> >& tris, WorldModelDefinition& def, WorldModelRoot* root )
-{
-    G3D::Matrix4 transformation = Utils::GetTransformation(def);
     for (std::vector<WorldModelGroup>::iterator group =  root->Groups.begin(); group != root->Groups.end(); ++group)
     {
         uint32 vertOffset = verts.size();
         for (std::vector<Vector3>::iterator itr2 = group->Vertices.begin(); itr2 != group->Vertices.end(); ++itr2)
-            verts.push_back(TransformDoodadVertex(def, *itr2)/*Utils::VectorTransform(*itr2, transformation)*/);
+        {
+            Vector3 v = Utils::TransformDoodadVertex(def, *itr2, translate);
+            // If translate is false, then we were called directly from the TileBuilder to add data to it's _Geometry member, hence, we have to manually convert the vertices to Recast format.
+            verts.push_back(translate ? v : Utils::ToRecast(v)); // Transform the vertex to world space
+        }
 
         for (uint32 i = 0; i < group->Triangles.size(); ++i)
         {
-            // only include collidable tris
+            // only include colliding tris
             if ((group->TriangleFlags[i] & 0x04) != 0 && group->TriangleMaterials[i] != 0xFF)
                 continue;
             Triangle<uint16> tri = group->Triangles[i];
@@ -141,10 +124,12 @@ void WorldModelHandler::InsertModelGeometry( std::vector<Vector3>& verts, std::v
 
             if (!model->IsCollidable)
                 continue;
-            G3D::Matrix4 doodadTransformation = Utils::GetWmoDoodadTransformation(*instance, def);
             int vertOffset = verts.size();
             for (std::vector<Vector3>::iterator itr2 = model->Vertices.begin(); itr2 != model->Vertices.end(); ++itr2)
-                verts.push_back(TransformDoodadVertex(def, *itr2)/*Utils::VectorTransform(*itr2, doodadTransformation)*/);
+            {
+                Vector3 v = Utils::TransformDoodadVertex(def, Utils::TransformWmoDoodad(*instance, def, *itr2, false), translate);
+                verts.push_back(translate ? v : Utils::ToRecast(v));
+            }
             for (std::vector<Triangle<uint16> >::iterator itr2 = model->Triangles.begin(); itr2 != model->Triangles.end(); ++itr2)
                 tris.push_back(Triangle<uint32>(Constants::TRIANGLE_TYPE_WMO, itr2->V0 + vertOffset, itr2->V1 + vertOffset, itr2->V2 + vertOffset));
         }
@@ -166,14 +151,20 @@ void WorldModelHandler::InsertModelGeometry( std::vector<Vector3>& verts, std::v
                         continue;
 
                     uint32 vertOffset = verts.size();
-                    verts.push_back(Utils::GetLiquidVert(transformation, liquidHeader.BaseLocation,
-                        liquidDataGeometry.HeightMap[x][y], x, y));
-                    verts.push_back(Utils::GetLiquidVert(transformation, liquidHeader.BaseLocation,
-                        liquidDataGeometry.HeightMap[x + 1][y], x + 1, y));
-                    verts.push_back(Utils::GetLiquidVert(transformation, liquidHeader.BaseLocation,
-                        liquidDataGeometry.HeightMap[x][y + 1], x, y + 1));
-                    verts.push_back(Utils::GetLiquidVert(transformation, liquidHeader.BaseLocation,
-                        liquidDataGeometry.HeightMap[x + 1][y + 1], x + 1, y + 1));
+
+                    Vector3 v1 = Utils::GetLiquidVert(def, liquidHeader.BaseLocation,
+                        liquidDataGeometry.HeightMap[x][y], x, y, translate);
+                    Vector3 v2 = Utils::GetLiquidVert(def, liquidHeader.BaseLocation,
+                        liquidDataGeometry.HeightMap[x + 1][y], x + 1, y, translate);
+                    Vector3 v3 = Utils::GetLiquidVert(def, liquidHeader.BaseLocation,
+                        liquidDataGeometry.HeightMap[x][y + 1], x, y + 1, translate);
+                    Vector3 v4 = Utils::GetLiquidVert(def, liquidHeader.BaseLocation,
+                        liquidDataGeometry.HeightMap[x + 1][y + 1], x + 1, y + 1, translate);
+
+                    verts.push_back(translate ? v1 : Utils::ToRecast(v1));
+                    verts.push_back(translate ? v2 : Utils::ToRecast(v2));
+                    verts.push_back(translate ? v3 : Utils::ToRecast(v3));
+                    verts.push_back(translate ? v4 : Utils::ToRecast(v4));
 
                     tris.push_back(Triangle<uint32>(Constants::TRIANGLE_TYPE_WATER, vertOffset, vertOffset + 2, vertOffset + 1));
                     tris.push_back(Triangle<uint32>(Constants::TRIANGLE_TYPE_WATER, vertOffset + 2, vertOffset + 3, vertOffset + 1));
