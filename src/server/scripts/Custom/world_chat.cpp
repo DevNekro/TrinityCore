@@ -54,7 +54,7 @@ public:
 	{
 		static ChatCommand commandTable[] =
 		{
-			{ "chat", RBAC_CUSTOM_COMMAND_CHAT, false, &HandleWorldChatCommand, "", NULL },
+			{ "chat", rbac::RBAC_CUSTOM_COMMAND_CHAT, false, &HandleWorldChatCommand, "", NULL },
 			{ NULL,   0,                        false, NULL,                    "", NULL }
 		};
  
