@@ -32,13 +32,9 @@ TransportTemplate::~TransportTemplate()
         delete *itr;
 }
 
-TransportMgr::TransportMgr()
-{
-}
+TransportMgr::TransportMgr() { }
 
-TransportMgr::~TransportMgr()
-{
-}
+TransportMgr::~TransportMgr() { }
 
 void TransportMgr::Unload()
 {
@@ -53,7 +49,7 @@ void TransportMgr::LoadTransportTemplates()
 
     if (!result)
     {
-        TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, ">> Loaded 0 transport templates. DB table `gameobject_template` has no transports!");
+        TC_LOG_INFO("server.loading", ">> Loaded 0 transport templates. DB table `gameobject_template` has no transports!");
         return;
     }
 
@@ -66,7 +62,7 @@ void TransportMgr::LoadTransportTemplates()
         GameObjectTemplate const* goInfo = sObjectMgr->GetGameObjectTemplate(entry);
         if (goInfo->moTransport.taxiPathId >= sTaxiPathNodesByPath.size())
         {
-            TC_LOG_ERROR(LOG_FILTER_SQL, "Transport %u (name: %s) has an invalid path specified in `gameobject_template`.`data0` (%u) field, skipped.", entry, goInfo->name.c_str(), goInfo->moTransport.taxiPathId);
+            TC_LOG_ERROR("sql.sql", "Transport %u (name: %s) has an invalid path specified in `gameobject_template`.`data0` (%u) field, skipped.", entry, goInfo->name.c_str(), goInfo->moTransport.taxiPathId);
             continue;
         }
 
@@ -82,7 +78,7 @@ void TransportMgr::LoadTransportTemplates()
         ++count;
     } while (result->NextRow());
 
-    TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, ">> Loaded %u transport templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    TC_LOG_INFO("server.loading", ">> Loaded %u transport templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void TransportMgr::GeneratePath(GameObjectTemplate const* goInfo, TransportTemplate* transport)
@@ -93,12 +89,12 @@ void TransportMgr::GeneratePath(GameObjectTemplate const* goInfo, TransportTempl
     Movement::PointsArray splinePath;
     bool mapChange = false;
     bool cyclic = true;
-    for (size_t i = 1; i < path.size() - 1; ++i)
+    for (size_t i = 0; i < path.size(); ++i)
     {
         if (!mapChange)
         {
             TaxiPathNodeEntry const& node_i = path[i];
-            if (node_i.actionFlag == 1 || node_i.mapid != path[i + 1].mapid)
+            if (i != path.size() - 1 && (node_i.actionFlag == 1 || node_i.mapid != path[i + 1].mapid))
             {
                 cyclic = false;
                 keyFrames.back().Teleport = true;
@@ -115,6 +111,24 @@ void TransportMgr::GeneratePath(GameObjectTemplate const* goInfo, TransportTempl
         else
             mapChange = false;
     }
+
+    // Not sure if data8 means the transport can be stopped or that its path in dbc does not contain extra spline points
+    if (!goInfo->moTransport.canBeStopped && splinePath.size() >= 2)
+    {
+        // Remove special catmull-rom spline points
+        splinePath.erase(splinePath.begin());
+        keyFrames.erase(keyFrames.begin());
+        splinePath.pop_back();
+        keyFrames.pop_back();
+        // Cyclic spline has one more extra point
+        if (cyclic && !splinePath.empty())
+        {
+            splinePath.pop_back();
+            keyFrames.pop_back();
+        }
+    }
+
+    ASSERT(!keyFrames.empty());
 
     if (transport->mapsUsed.size() > 1)
     {
@@ -157,11 +171,12 @@ void TransportMgr::GeneratePath(GameObjectTemplate const* goInfo, TransportTempl
         spline->initLengths();
         keyFrames[0].DistFromPrev = spline->length(spline->last() - 2, spline->last() - 1);
         keyFrames[0].Spline = spline;
-        for (size_t i = 1; i < keyFrames.size(); ++i)
+        for (size_t i = 0; i < keyFrames.size(); ++i)
         {
             keyFrames[i].Index = i + 1;
             keyFrames[i].DistFromPrev = spline->length(i, i + 1);
-            keyFrames[i - 1].NextDistFromPrev = keyFrames[i].DistFromPrev;
+            if (i > 0)
+                keyFrames[i - 1].NextDistFromPrev = keyFrames[i].DistFromPrev;
             keyFrames[i].Spline = spline;
             if (keyFrames[i].IsStopFrame())
             {
@@ -215,6 +230,9 @@ void TransportMgr::GeneratePath(GameObjectTemplate const* goInfo, TransportTempl
 
     keyFrames.back().NextDistFromPrev = keyFrames.front().DistFromPrev;
 
+    if (firstStop == -1 || lastStop == -1)
+        firstStop = lastStop = 0;
+
     // at stopping keyframes, we define distSinceStop == 0,
     // and distUntilStop is to the next stopping keyframe.
     // this is required to properly handle cases of two stopping frames in a row (yes they do exist)
@@ -222,7 +240,7 @@ void TransportMgr::GeneratePath(GameObjectTemplate const* goInfo, TransportTempl
     for (size_t i = 0; i < keyFrames.size(); ++i)
     {
         int32 j = (i + lastStop) % keyFrames.size();
-        if (keyFrames[j].IsStopFrame())
+        if (keyFrames[j].IsStopFrame() || j == lastStop)
             tmpDist = 0.0f;
         else
             tmpDist += keyFrames[j].DistFromPrev;
@@ -235,7 +253,7 @@ void TransportMgr::GeneratePath(GameObjectTemplate const* goInfo, TransportTempl
         int32 j = (i + firstStop) % keyFrames.size();
         tmpDist += keyFrames[(j + 1) % keyFrames.size()].DistFromPrev;
         keyFrames[j].DistUntilStop = tmpDist;
-        if (keyFrames[j].IsStopFrame())
+        if (keyFrames[j].IsStopFrame() || j == firstStop)
             tmpDist = 0.0f;
     }
 
@@ -272,7 +290,7 @@ void TransportMgr::GeneratePath(GameObjectTemplate const* goInfo, TransportTempl
     for (size_t i = 0; i < keyFrames.size(); ++i)
     {
         int32 j = (i + lastStop) % keyFrames.size();
-        if (keyFrames[j].IsStopFrame())
+        if (keyFrames[j].IsStopFrame() || j == lastStop)
             segmentTime = keyFrames[j].TimeTo;
         keyFrames[j].TimeFrom = segmentTime - keyFrames[j].TimeTo;
     }
@@ -288,12 +306,12 @@ void TransportMgr::GeneratePath(GameObjectTemplate const* goInfo, TransportTempl
 
     for (size_t i = 1; i < keyFrames.size(); ++i)
     {
-        curPathTime += keyFrames[i-1].TimeTo;
+        curPathTime += keyFrames[i - 1].TimeTo;
         if (keyFrames[i].IsStopFrame())
         {
             keyFrames[i].ArriveTime = uint32(curPathTime * IN_MILLISECONDS);
             keyFrames[i - 1].NextArriveTime = keyFrames[i].ArriveTime;
-            curPathTime += (float)keyFrames[i].Node->delay;
+            curPathTime += float(keyFrames[i].Node->delay);
             keyFrames[i].DepartureTime = uint32(curPathTime * IN_MILLISECONDS);
         }
         else
@@ -304,10 +322,10 @@ void TransportMgr::GeneratePath(GameObjectTemplate const* goInfo, TransportTempl
             keyFrames[i].DepartureTime = keyFrames[i].ArriveTime;
         }
     }
+
     keyFrames.back().NextArriveTime = keyFrames.back().DepartureTime;
 
     transport->pathTime = keyFrames.back().DepartureTime;
-    //WorldDatabase.DirectPExecute("UPDATE `transports` SET `period_gen`=%u WHERE `entry`=%u", transport->pathTime, transport->entry);
 }
 
 void TransportMgr::AddPathNodeToTransport(uint32 transportEntry, uint32 timeSeg, TransportAnimationEntry const* node)
@@ -336,7 +354,7 @@ Transport* TransportMgr::CreateTransport(uint32 entry, uint32 guid /*= 0*/, Map*
     TransportTemplate const* tInfo = GetTransportTemplate(entry);
     if (!tInfo)
     {
-        TC_LOG_ERROR(LOG_FILTER_SQL, "Transport %u will not be loaded, `transport_template` missing", entry);
+        TC_LOG_ERROR("sql.sql", "Transport %u will not be loaded, `transport_template` missing", entry);
         return NULL;
     }
 
@@ -363,7 +381,7 @@ Transport* TransportMgr::CreateTransport(uint32 entry, uint32 guid /*= 0*/, Map*
     {
         if (mapEntry->Instanceable() != tInfo->inInstance)
         {
-            TC_LOG_ERROR(LOG_FILTER_TRANSPORTS, "Transport %u (name: %s) attempted creation in instance map (id: %u) but it is not an instanced transport!", entry, trans->GetName().c_str(), mapId);
+            TC_LOG_ERROR("entities.transport", "Transport %u (name: %s) attempted creation in instance map (id: %u) but it is not an instanced transport!", entry, trans->GetName().c_str(), mapId);
             delete trans;
             return NULL;
         }
@@ -406,7 +424,7 @@ void TransportMgr::SpawnContinentTransports()
         } while (result->NextRow());
     }
 
-    TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, ">> Spawned %u continent transports in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    TC_LOG_INFO("server.loading", ">> Spawned %u continent transports in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void TransportMgr::CreateInstanceTransports(Map* map)
